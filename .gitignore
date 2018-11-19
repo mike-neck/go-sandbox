@@ -1,2 +1,5 @@
 build/
 .idea/
+
+cmd/go-xml-analyze/pom.go
+cmd/go-xml-analyze/pom.xsd

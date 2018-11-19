@@ -1,0 +1,12 @@
+
+.PHONY: dep pom
+
+dep:
+	@echo get xsdgen
+	go get aqwari.net/xml/...
+
+pom: dep
+	@echo downloads pom xsd
+	curl https://maven.apache.org/xsd/maven-4.0.0.xsd -o cmd/go-xml-analyze/pom.xsd
+	xsdgen -o cmd/go-xml-analyze/pom.go -pkg main cmd/go-xml-analyze/pom.xsd
+
