@@ -10,3 +10,10 @@ pom: dep
 	curl https://maven.apache.org/xsd/maven-4.0.0.xsd -o cmd/go-xml-analyze/pom.xsd
 	xsdgen -o cmd/go-xml-analyze/pom.go -pkg main cmd/go-xml-analyze/pom.xsd
 
+build: dep
+	@echo build
+	go build -o build/go-xml-analyze cmd/go-xml-analyze/*.go
+
+run-app: build
+	@echo run application
+	build/go-xml-analyze
