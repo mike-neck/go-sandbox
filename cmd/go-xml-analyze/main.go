@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/xml"
+	"io"
 	"log"
 	"os"
 	"reflect"
@@ -14,18 +15,27 @@ func main() {
 	}
 	defer pom.Close()
 
+	err = run(pom)
+	if err != nil {
+		log.Println("error", err)
+		return
+	}
+}
+
+func run(pom io.Reader) error {
 	decoder := xml.NewDecoder(pom)
 	token, err := decoder.Token()
 	if err != nil {
 		log.Println("failed to get token", err)
-		return
+		return err
 	}
 	switch tokenType := token.(type) {
 	case xml.StartElement:
 		var project Model
 		err := project.UnmarshalXML(decoder, tokenType)
 		if err != nil {
-			log.Fatalln("failed to parse pom", err)
+			log.Println("failed to parse pom", err)
+			return err
 		}
 		log.Println(project)
 		for _, dep := range project.Dependencies.Dependency {
@@ -38,14 +48,15 @@ func main() {
 	token, err = decoder.Token()
 	if err != nil {
 		log.Println("failed to get token", err)
-		return
+		return err
 	}
 	switch tokenType := token.(type) {
 	case xml.StartElement:
 		var project Model
 		err := project.UnmarshalXML(decoder, tokenType)
 		if err != nil {
-			log.Fatalln("failed to parse pom", err)
+			log.Println("failed to parse pom", err)
+			return err
 		}
 		log.Println(project)
 		for _, dep := range project.Dependencies.Dependency {
@@ -58,14 +69,15 @@ func main() {
 	token, err = decoder.Token()
 	if err != nil {
 		log.Println("failed to get token", err)
-		return
+		return err
 	}
 	switch tokenType := token.(type) {
 	case xml.StartElement:
 		var project Model
 		err := project.UnmarshalXML(decoder, tokenType)
 		if err != nil {
-			log.Fatalln("failed to parse pom", err)
+			log.Println("failed to parse pom", err)
+			return err
 		}
 		log.Println(project)
 		for _, dep := range project.Dependencies.Dependency {
@@ -74,4 +86,5 @@ func main() {
 	default:
 		log.Println("type of token", reflect.TypeOf(tokenType), tokenType)
 	}
+	return nil
 }
