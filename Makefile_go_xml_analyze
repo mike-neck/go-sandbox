@@ -1,5 +1,5 @@
 
-.PHONY: dep pom
+.PHONY: dep pom fmt vet
 
 dep:
 	@echo get xsdgen
@@ -17,3 +17,11 @@ build: dep
 run-app: build
 	@echo run application
 	build/go-xml-analyze
+
+fmt:
+	@echo fmt
+	go fmt cmd/go-xml-analyze/*.go
+
+vet:
+	@echo vet
+	go vet cmd/go-xml-analyze/*.go
