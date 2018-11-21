@@ -2,27 +2,27 @@ package main
 
 import (
 	"encoding/xml"
-	"io"
 	"log"
 	"os"
 	"reflect"
 )
 
 func main() {
-	pom, err := os.Open("cmd/go-xml-analyze/testdata/junit-jupiter-api-5.0.0-M3.pom")
+	err := run("cmd/go-xml-analyze/testdata/junit-jupiter-api-5.0.0-M3.pom")
 	if err != nil {
-		log.Fatalln("failed to open pom file.", err)
-	}
-	defer pom.Close()
-
-	err = run(pom)
-	if err != nil {
-		log.Println("error", err)
-		return
+		log.Fatalln("error", err)
 	}
 }
 
-func run(pom io.Reader) error {
+func run(file string) error {
+	log.Println("parse file", file)
+	pom, err := os.Open(file)
+	if err != nil {
+		log.Println("failed to open pom file.", err)
+		return err
+	}
+	defer pom.Close()
+
 	decoder := xml.NewDecoder(pom)
 
 	for {
@@ -64,7 +64,7 @@ func (m Model) show() bool {
 	log.Println("parsing pom is succeeded.")
 	log.Println(m)
 	for _, dep := range m.Dependencies.Dependency {
-		log.Println(dep)
+		log.Println("group:", dep.GroupId, "artifact:", dep.ArtifactId, "version:", dep.Version, "scope:", dep.Scope)
 	}
 	return true
 }
