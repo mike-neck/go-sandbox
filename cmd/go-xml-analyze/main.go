@@ -24,10 +24,27 @@ func main() {
 
 func run(pom io.Reader) error {
 	decoder := xml.NewDecoder(pom)
+
+	for {
+		elem, err := read(decoder)
+		if err != nil {
+			return err
+		}
+		if elem.show() {
+			return nil
+		}
+	}
+}
+
+type Elem interface {
+	show() bool
+}
+
+func read(decoder *xml.Decoder) (Elem, error) {
 	token, err := decoder.Token()
 	if err != nil {
 		log.Println("failed to get token", err)
-		return err
+		return nil, err
 	}
 	switch tokenType := token.(type) {
 	case xml.StartElement:
@@ -35,56 +52,28 @@ func run(pom io.Reader) error {
 		err := project.UnmarshalXML(decoder, tokenType)
 		if err != nil {
 			log.Println("failed to parse pom", err)
-			return err
+			return nil, err
 		}
-		log.Println(project)
-		for _, dep := range project.Dependencies.Dependency {
-			log.Println(dep)
-		}
+		return project, nil
 	default:
-		log.Println("type of token", reflect.TypeOf(tokenType), tokenType)
+		return &Another{token: tokenType}, nil
 	}
+}
 
-	token, err = decoder.Token()
-	if err != nil {
-		log.Println("failed to get token", err)
-		return err
+func (m Model) show() bool {
+	log.Println("parsing pom is succeeded.")
+	log.Println(m)
+	for _, dep := range m.Dependencies.Dependency {
+		log.Println(dep)
 	}
-	switch tokenType := token.(type) {
-	case xml.StartElement:
-		var project Model
-		err := project.UnmarshalXML(decoder, tokenType)
-		if err != nil {
-			log.Println("failed to parse pom", err)
-			return err
-		}
-		log.Println(project)
-		for _, dep := range project.Dependencies.Dependency {
-			log.Println(dep)
-		}
-	default:
-		log.Println("type of token", reflect.TypeOf(tokenType), tokenType)
-	}
+	return true
+}
 
-	token, err = decoder.Token()
-	if err != nil {
-		log.Println("failed to get token", err)
-		return err
-	}
-	switch tokenType := token.(type) {
-	case xml.StartElement:
-		var project Model
-		err := project.UnmarshalXML(decoder, tokenType)
-		if err != nil {
-			log.Println("failed to parse pom", err)
-			return err
-		}
-		log.Println(project)
-		for _, dep := range project.Dependencies.Dependency {
-			log.Println(dep)
-		}
-	default:
-		log.Println("type of token", reflect.TypeOf(tokenType), tokenType)
-	}
-	return nil
+type Another struct {
+	token xml.Token
+}
+
+func (a *Another) show() bool {
+	log.Println("type of token", reflect.TypeOf(a.token), a.token)
+	return false
 }
