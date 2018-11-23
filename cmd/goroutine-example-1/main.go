@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"sync"
+	"time"
 )
 
 func main() {
@@ -50,13 +51,26 @@ func (wk Worker) supplier(channel *chan string) {
 		"io.projectreactor:reactor-core:3.2.1.RELEASE",
 		"org.jctools:jctools-core",
 		"org.slf4j:slf4j-api")
+	log.Println(wk.name, "finish")
 	close(*channel)
 	wk.wait.Done()
 }
 
 func (wk Worker) supply(channel *chan string, items ...string) {
-	for _, item := range items {
-		log.Println(wk.name, "supply", item)
-		*channel <- item
+	var index int
+	index = 0
+	ticker := time.NewTicker(1 * time.Second)
+	for {
+		select {
+		case <-ticker.C:
+			item := items[index]
+			log.Println(wk.name, "supply", item)
+			*channel <- item
+			index++
+		}
+		if index == len(items) {
+			break
+		}
 	}
+	ticker.Stop()
 }
